@@ -7,26 +7,64 @@
 
 ## 使用方法
 
-### 必需参数
-- **p8_path**: P8 证书文件的绝对路径
-- **team_id**: Apple Developer Team ID（例如：569GNZ5392）
-- **key_id**: P8 证书的 Key ID（例如：HB5S8B644A）
-- **bundle_id**: 应用的 Bundle Identifier（例如：com.netease.NIM.demo）
-- **device_token**: 目标设备的 Device Token
-- **alert_content**: 推送通知的标题和正文内容
-- **environment**: 环境类型，可选值：`sandbox`（开发）或 `production`（生产）
+### 交互式使用（推荐）
 
-### 可选参数
-- **badge**: 应用图标角标数字（默认不设置）
-- **sound**: 通知音效（默认：default）
-- **category**: 通知类别（用于交互式通知）
-- **custom_data**: 自定义 JSON 数据
+当你需要发送推送时，只需告诉 AI **"帮我发送 iOS 推送"** 或 **"发一条 APNs 推送"**，AI 会提示你提供以下信息：
 
-## 示例
+**必需信息**（一次性提供）：
+1. **P8 证书文件**：上传或提供 .p8 文件路径
+2. **Team ID**：Apple Developer 账号的 Team ID（例如：569GNZ5392）
+3. **Key ID**：P8 证书的 Key ID（例如：HB5S8B644A，通常可以从文件名获取）
+4. **Bundle ID**：应用的 Bundle Identifier（例如：com.netease.NIM.demo）
+5. **Device Token**：目标设备的 Device Token
+6. **推送内容**：通知的标题和正文
+7. **环境**：开发环境 (sandbox) 还是生产环境 (production)
 
-### 基本用法
+**可选信息**（如不提供则使用默认值）：
+- 角标数字 (badge)
+- 通知音效 (sound)
+- 通知类别 (category)
+- 自定义数据 (custom_data)
+
+### 示例对话
+
+**用户**: 帮我发送一条 iOS 推送
+
+**AI**: 好的，请一次性提供以下信息：
+```
+📱 iOS APNs 推送所需信息
+
+【必需信息】
+1. P8 证书文件：请上传 .p8 文件或提供文件路径
+2. Team ID：Apple Developer 账号的 Team ID
+3. Key ID：P8 证书的 Key ID
+4. Bundle ID：应用的 Bundle Identifier
+5. Device Token：目标设备的 Device Token
+6. 推送内容：通知的标题和正文
+7. 环境：sandbox (开发) 或 production (生产)
+
+【可选信息】
+- 角标数字 (badge)
+- 通知音效 (sound，默认：default)
+- 自定义 JSON 数据 (custom_data)
+```
+
+**用户**:
+```
+P8 证书：/path/to/APNsAuthKey.p8
+Team ID: 569GNZ5392
+Key ID: HB5S8B644A
+Bundle ID: com.netease.NIM.demo
+Device Token: 61f7fa70a44eae014f86bc7a2c2c21e4e4455f6badd6130c14dc97355aab8434
+推送内容：你好，这是一条测试推送
+环境：sandbox
+```
+
+**AI**: 正在发送推送... ✅ 推送发送成功！
+
+### 命令行直接调用
+
 ```bash
-# 开发环境推送
 bash ${SKILLS_ROOT:-/workspace/skills}/apns-push/send_push.sh \
   --p8_path "/path/to/APNsAuthKey.p8" \
   --team_id "569GNZ5392" \
@@ -37,32 +75,21 @@ bash ${SKILLS_ROOT:-/workspace/skills}/apns-push/send_push.sh \
   --environment "sandbox"
 ```
 
-### 生产环境推送
-```bash
-bash ${SKILLS_ROOT:-/workspace/skills}/apns-push/send_push.sh \
-  --p8_path "/path/to/APNsAuthKey.p8" \
-  --team_id "569GNZ5392" \
-  --key_id "HB5S8B644A" \
-  --bundle_id "com.example.app" \
-  --device_token "device_token_here" \
-  --alert_content "生产环境推送" \
-  --environment "production"
-```
+## 参数说明
 
-### 带自定义数据
-```bash
-bash ${SKILLS_ROOT:-/workspace/skills}/apns-push/send_push.sh \
-  --p8_path "/path/to/APNsAuthKey.p8" \
-  --team_id "569GNZ5392" \
-  --key_id "HB5S8B644A" \
-  --bundle_id "com.example.app" \
-  --device_token "device_token_here" \
-  --alert_content "带数据的推送" \
-  --environment "sandbox" \
-  --badge "5" \
-  --sound "default" \
-  --custom_data '{"type":"message","messageId":"12345"}'
-```
+| 参数 | 必需 | 说明 | 示例 |
+|------|------|------|------|
+| `--p8_path` | ✓ | P8 证书文件路径 | `/path/to/APNsAuthKey.p8` |
+| `--team_id` | ✓ | Apple Team ID | `569GNZ5392` |
+| `--key_id` | ✓ | P8 Key ID | `HB5S8B644A` |
+| `--bundle_id` | ✓ | 应用 Bundle ID | `com.example.app` |
+| `--device_token` | ✓ | 设备 Token | `61f7fa...` |
+| `--alert_content` | ✓ | 推送标题和正文 | `你好` |
+| `--environment` | ✓ | sandbox 或 production | `sandbox` |
+| `--badge` |  | 角标数字 | `5` |
+| `--sound` |  | 通知音效 | `default` |
+| `--category` |  | 通知类别 | `MESSAGE_CATEGORY` |
+| `--custom_data` |  | 自定义 JSON 数据 | `{"type":"message"}` |
 
 ## 错误处理
 - 返回 HTTP 200 表示推送发送成功

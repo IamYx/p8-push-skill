@@ -11,12 +11,46 @@ BADGE=""
 SOUND="default"
 CATEGORY=""
 CUSTOM_DATA=""
+INTERACTIVE_MODE=false
 
 # 颜色输出
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
+
+show_info_template() {
+    cat << 'EOF'
+
+📱 iOS APNs 推送所需信息
+
+【必需信息】请一次性提供以下 7 项：
+  1. P8 证书文件   - 请上传 .p8 文件或提供文件路径
+  2. Team ID       - Apple Developer 账号的 Team ID (例如：569GNZ5392)
+  3. Key ID        - P8 证书的 Key ID (例如：HB5S8B644A，可从文件名获取)
+  4. Bundle ID     - 应用的 Bundle Identifier (例如：com.netease.NIM.demo)
+  5. Device Token  - 目标设备的 Device Token
+  6. 推送内容      - 通知的标题和正文
+  7. 环境          - sandbox (开发) 或 production (生产)
+
+【可选信息】如不提供则使用默认值：
+  • 角标数字 (badge)
+  • 通知音效 (sound，默认：default)
+  • 通知类别 (category，用于交互式通知)
+  • 自定义 JSON 数据 (custom_data)
+
+【回复示例】
+  P8 证书：/path/to/APNsAuthKey.p8
+  Team ID: 569GNZ5392
+  Key ID: HB5S8B644A
+  Bundle ID: com.netease.NIM.demo
+  Device Token: 61f7fa70a44eae014f86bc7a2c2c21e4e4455f6badd6130c14dc97355aab8434
+  推送内容：你好，这是一条测试推送
+  环境：sandbox
+
+EOF
+}
 
 usage() {
     cat << EOF
@@ -36,8 +70,12 @@ usage() {
   --sound           通知音效，默认：default
   --category        通知类别（用于交互式通知）
   --custom_data     自定义 JSON 数据
+  --info            显示信息模板（交互式模式）
+  -h, --help        显示帮助信息
 
 示例:
+  $0 --info  # 显示所需信息列表
+
   $0 --p8_path "/path/to/key.p8" --team_id "569GNZ5392" --key_id "HB5S8B644A" \\
      --bundle_id "com.example.app" --device_token "device_token" \\
      --alert_content "你好" --environment "sandbox"
@@ -92,6 +130,10 @@ while [[ $# -gt 0 ]]; do
             CUSTOM_DATA="$2"
             shift 2
             ;;
+        --info)
+            INTERACTIVE_MODE=true
+            shift
+            ;;
         -h|--help)
             usage
             ;;
@@ -101,6 +143,12 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+# 如果是交互式模式，显示信息模板
+if [[ "$INTERACTIVE_MODE" == true ]]; then
+    show_info_template
+    exit 0
+fi
 
 # 验证必需参数
 missing_params=()
@@ -113,6 +161,8 @@ missing_params=()
 
 if [[ ${#missing_params[@]} -gt 0 ]]; then
     echo -e "${RED}错误：缺少必需参数：${missing_params[*]}${NC}"
+    echo ""
+    echo -e "${BLUE}请使用 --info 参数查看所需信息列表${NC}"
     usage
 fi
 
